@@ -1,0 +1,50 @@
+services:
+  # --- PHP / Symfony ---
+  php:
+    build: ./backend
+    container_name: eradio_php
+    volumes:
+      - ./backend:/var/www/html
+    depends_on:
+      - db
+
+  # --- Nginx pour exposer l'API ---
+  nginx:
+    image: nginx:alpine
+    container_name: eradio_nginx
+    ports:
+      - "8090:80"
+    volumes:
+      - ./backend:/var/www/html              # plus simple que juste /public
+      - ./backend/nginx:/etc/nginx/conf.d    # on monte le dossier, pas un fichier
+    depends_on:
+      - php
+
+  # --- Base de données MySQL ---
+  db:
+    image: mysql:8.0
+    container_name: eradio_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: eradiologie
+      MYSQL_USER: eradio_user
+      MYSQL_PASSWORD: eradio_pass
+    # pas de ports ici
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # --- phpMyAdmin (facultatif mais pratique) ---
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: eradio_pma
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports:
+      - "8081:80"          # phpMyAdmin sur http://localhost:8082
+    depends_on:
+      - db
+
+volumes:
+  db_data:
