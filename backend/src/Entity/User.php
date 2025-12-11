@@ -3,14 +3,18 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use App\Repository\UserRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+# 1. On ajoute cet import indispensable
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use App\Repository\UserRepository;
 
 #[ApiResource]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User implements UserInterface
+#[ORM\Table(name: '`user`')]
+# 2. On implémente PasswordAuthenticatedUserInterface ici
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -32,12 +36,6 @@ class User implements UserInterface
     #[ORM\Column(length: 255)]
     private ?string $lastName = null;
 
-    // Méthode obligatoire pour l'interface UserInterface
-    public function getUserIdentifier(): string
-    {
-        return $this->email; // L'identifiant de l'utilisateur, ici l'email
-    }
-
     public function getId(): ?int
     {
         return $this->id;
@@ -51,11 +49,39 @@ class User implements UserInterface
     public function setEmail(string $email): static
     {
         $this->email = $email;
-
         return $this;
     }
 
-    public function getPassword(): ?string
+    /**
+     * Identifiant visuel de l'utilisateur (obligatoire UserInterface)
+     */
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        // On garantit que chaque utilisateur a au moins le rôle ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+        return $this;
+    }
+
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
+    public function getPassword(): string
     {
         return $this->password;
     }
@@ -63,19 +89,6 @@ class User implements UserInterface
     public function setPassword(string $password): static
     {
         $this->password = $password;
-
-        return $this;
-    }
-
-    public function getRoles(): array
-    {
-        return $this->roles;
-    }
-
-    public function setRoles(array $roles): static
-    {
-        $this->roles = $roles;
-
         return $this;
     }
 
@@ -87,7 +100,6 @@ class User implements UserInterface
     public function setFirstName(string $firstName): static
     {
         $this->firstName = $firstName;
-
         return $this;
     }
 
@@ -99,12 +111,14 @@ class User implements UserInterface
     public function setLastName(string $lastName): static
     {
         $this->lastName = $lastName;
-
         return $this;
     }
 
+    /**
+     * @see UserInterface
+     */
     public function eraseCredentials(): void
     {
-        // not needed for now
+        // $this->plainPassword = null;
     }
 }
