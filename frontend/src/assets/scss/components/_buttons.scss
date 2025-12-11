@@ -1,0 +1,62 @@
+@use "sass:color";
+@use "../variables" as *;
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  font-family: inherit;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background-color: $primary;
+  color: white;
+
+  &:hover:not(:disabled) {
+    // REMPLACEMENT DE DARKEN PAR COLOR.ADJUST
+    background-color: color.adjust($primary, $lightness: -10%);
+    transform: translateY(-1px);
+  }
+}
+
+.btn-danger {
+  background-color: $danger;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background-color: color.adjust($danger, $lightness: -10%);
+  }
+}
+
+.btn-secondary {
+  background-color: $secondary;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background-color: color.adjust($secondary, $lightness: -10%);
+  }
+}
+
+.btn-outline {
+  background-color: transparent;
+  border-color: $primary;
+  color: $primary;
+
+  &:hover:not(:disabled) {
+    background-color: $primary;
+    color: white;
+  }
+}

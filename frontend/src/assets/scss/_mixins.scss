@@ -1,0 +1,71 @@
+// src/assets/scss/_mixins.scss
+
+// 1. On importe le module "map" pour gérer les tableaux associatifs
+@use "sass:map";
+
+// ======================================================
+// 1. Breakpoints (Points de rupture pour le Responsive)
+// ======================================================
+$breakpoints: (
+  'mobile': 576px,
+  'tablet': 768px,
+  'desktop': 992px,
+  'large': 1200px
+);
+
+// Utilisation : @include respond-to('tablet') { ... }
+@mixin respond-to($breakpoint) {
+  // CORRECTION ICI : on utilise map.has-key au lieu de map-has-key
+  @if map.has-key($breakpoints, $breakpoint) {
+
+    // CORRECTION ICI : on utilise map.get au lieu de map-get
+    @media (min-width: map.get($breakpoints, $breakpoint)) {
+      @content;
+    }
+
+  } @else {
+    @warn "Malheureusement, la valeur `#{$breakpoint}` n'est pas définie dans la map `$breakpoints`.";
+  }
+}
+
+// ======================================================
+// 2. Flexbox Facile
+// ======================================================
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin flex-gap($gap) {
+  gap: $gap;
+}
+
+// ======================================================
+// 3. Typographie et Texte
+// ======================================================
+@mixin text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ======================================================
+// 4. Ombres
+// ======================================================
+@mixin shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+@mixin shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+@mixin shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}

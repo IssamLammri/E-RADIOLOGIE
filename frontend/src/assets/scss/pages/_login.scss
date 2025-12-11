@@ -1,0 +1,137 @@
+// src/assets/scss/pages/_login.scss
+
+// Note : Pas besoin d'importer variables ou mixins, Vite le fait déjà !
+// 1. Module de couleur (indispensable pour color.change)
+@use "sass:color";
+
+// 2. Variables (indispensable pour $primary, $text-color...)
+// Notez les ".." pour remonter d'un dossier (car on est dans /pages)
+@use "../variables" as *;
+
+// 3. Mixins (indispensable pour @include respond-to)
+@use "../mixins" as *;
+
+.login-wrapper {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: #fff;
+}
+
+// --- PARTIE GAUCHE (VISUELLE) ---
+.login-visual {
+  display: none; // Caché sur mobile par défaut
+
+  @include respond-to('desktop') {
+    display: block;
+    flex: 1.2;
+
+    // --- CHANGEMENT ICI ---
+    // On utilise @ pour pointer vers le dossier src
+    background-image: url('@/assets/images/login-pic.webp');
+    // ----------------------
+
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+
+  .overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    // Dégradé utilisant votre couleur primaire
+    background: linear-gradient(to bottom, color.change($primary, $alpha: 0.4), rgba(0,0,0, 0.8));
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 3rem;
+    color: white;
+  }
+
+  .testimonial {
+    max-width: 600px;
+    animation: fadeIn 1s ease-out;
+
+    .quote {
+      font-size: 1.5rem;
+      font-style: italic;
+      line-height: 1.4;
+      margin-bottom: 1.5rem;
+      font-weight: 300;
+    }
+
+    .author {
+      display: flex;
+      flex-direction: column;
+
+      .name { font-weight: bold; font-size: 1.1rem; }
+      .role { font-size: 0.9rem; opacity: 0.8; }
+    }
+  }
+}
+
+// --- PARTIE DROITE (FORMULAIRE) ---
+.login-form-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background-color: #fff;
+
+  .form-content {
+    width: 100%;
+    max-width: 400px;
+  }
+}
+
+.header {
+  margin-bottom: 2.5rem;
+  text-align: center;
+
+  .icon { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
+  h1 { font-size: 1.8rem; color: $text-color; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
+  .subtitle { color: $secondary; font-size: 1rem; }
+}
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+
+  label { margin-bottom: 0; }
+  .forgot-password { font-size: 0.85rem; color: $primary; text-decoration: none; &:hover { text-decoration: underline; }}
+}
+
+.btn-block {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.85rem;
+  font-size: 1.05rem;
+}
+
+.footer {
+  margin-top: 3rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: $secondary;
+
+  a { color: $primary; text-decoration: none; font-weight: 500; }
+
+  .security-note {
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    color: #888;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -3,114 +3,111 @@ import { ref } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useRouter } from 'vue-router';
 
-// Variables réactives pour le formulaire
+// 1. IMPORT DU LOGO (Vite va gérer le chemin automatiquement)
+import logoImg from '@/assets/images/logo_e-radiologie.png';
+
+// Variables réactives
 const email = ref('');
 const password = ref('');
 const errorMessage = ref('');
+const isLoading = ref(false);
 
-// On récupère le store et le router
 const authStore = useAuthStore();
 const router = useRouter();
 
 const handleLogin = async () => {
-  errorMessage.value = ''; // Reset de l'erreur
+  errorMessage.value = '';
+  isLoading.value = true;
 
   try {
-    // 1. On tente le login via le store
     await authStore.login(email.value, password.value);
-
-    // 2. Si ça marche (pas d'erreur levée), on redirige vers l'accueil
-    console.log("Connexion réussie !");
-    await router.push('/');
-
+    setTimeout(async () => {
+      await router.push('/');
+    }, 500);
   } catch (error) {
-    // 3. Si ça échoue, on affiche un message
-    errorMessage.value = "Email ou mot de passe incorrect.";
+    errorMessage.value = "Identifiants incorrects. Veuillez réessayer.";
+    isLoading.value = false;
   }
 };
 </script>
 
 <template>
-  <div class="login-container">
-    <div class="card">
-      <h1>Connexion</h1>
-      <p class="subtitle">E-RADIOLOGIE</p>
+  <div class="login-wrapper">
 
-      <form @submit.prevent="handleLogin">
-        <div class="form-group">
-          <label>Email</label>
-          <input
-            v-model="email"
-            type="email"
-            placeholder="exemple@mail.com"
-            required
-          />
+    <div class="login-visual">
+      <div class="overlay">
+        <div class="testimonial">
+          <p class="quote">"E-RADIOLOGIE a révolutionné notre approche du diagnostic. Une plateforme intuitive, fiable et parfaitement adaptée aux besoins des professionnels."</p>
+          <div class="author">
+            <span class="name">Mounib BOUMARTA</span>
+            <span class="role">Radiologue, CHU d'Alger</span>
+          </div>
         </div>
-
-        <div class="form-group">
-          <label>Mot de passe</label>
-          <input
-            v-model="password"
-            type="password"
-            placeholder="Votre mot de passe"
-            required
-          />
-        </div>
-
-        <p v-if="errorMessage" class="error-msg">{{ errorMessage }}</p>
-
-        <button type="submit" class="btn-primary">Se connecter</button>
-      </form>
+      </div>
     </div>
+
+    <div class="login-form-container">
+      <div class="form-content">
+        <div class="header">
+          <img :src="logoImg" alt="Logo E-Radiologie" class="logo-img" />
+          <p class="subtitle">Portail de connexion sécurisé</p>
+        </div>
+
+        <form @submit.prevent="handleLogin">
+          <div class="form-group">
+            <label>Adresse Email</label>
+            <input
+              v-model="email"
+              type="email"
+              placeholder="nom@hopital.fr"
+              required
+              :disabled="isLoading"
+            />
+          </div>
+
+          <div class="form-group">
+            <div class="label-row">
+              <label>Mot de passe</label>
+              <a href="#" class="forgot-password">Oublié ?</a>
+            </div>
+            <input
+              v-model="password"
+              type="password"
+              placeholder="••••••••"
+              required
+              :disabled="isLoading"
+            />
+          </div>
+
+          <p v-if="errorMessage" class="error-msg">
+            ⚠️ {{ errorMessage }}
+          </p>
+
+          <button type="submit" class="btn btn-primary btn-block" :disabled="isLoading">
+            <span v-if="!isLoading">Se connecter au portail</span>
+            <span v-else>Connexion en cours...</span>
+          </button>
+        </form>
+
+        <div class="footer">
+          <p>Vous n'avez pas de compte ? <a href="#">Contacter l'administrateur</a></p>
+          <p class="security-note">🔒 Connexion chiffrée de bout en bout</p>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
-<style scoped>
-/* Un peu de style pour que ce soit propre */
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #f4f6f8;
+<style scoped lang="scss">
+.header {
+  .logo-img {
+    max-width: 150px; // Ajustez cette valeur selon la taille souhaitée
+    height: auto;
+    margin-bottom: 1rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
-
-.card {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  width: 100%;
-  max-width: 400px;
-  text-align: center;
-}
-
-h1 { margin-bottom: 0.5rem; color: #333; }
-.subtitle { color: #666; margin-bottom: 2rem; }
-
-.form-group { margin-bottom: 1rem; text-align: left; }
-label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: bold; }
-input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  box-sizing: border-box;
-}
-
-.btn-primary {
-  width: 100%;
-  padding: 12px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: bold;
-  margin-top: 1rem;
-}
-.btn-primary:hover { background-color: #0056b3; }
-
-.error-msg { color: #dc3545; font-size: 0.9rem; margin-top: 1rem; }
 </style>

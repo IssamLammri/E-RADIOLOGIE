@@ -1,0 +1,71 @@
+// src/assets/scss/components/_forms.scss
+
+// 1. On importe le module de couleur de Sass (pour gérer la transparence proprement)
+@use "sass:color";
+
+// 2. On importe vos variables globales (pour $primary, $text-color, $danger)
+@use "../variables" as *;
+
+.form-group {
+  margin-bottom: 1.25rem; // Espacement standard entre les champs
+}
+
+// Labels au-dessus des inputs
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: $text-color;
+  font-size: 0.95rem;
+}
+
+// Style des champs de texte (input, select, textarea)
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-family: inherit;
+  color: $text-color;
+  background-color: #fff;
+  border: 1px solid #ced4da; // Bordure grise standard
+  border-radius: 6px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  appearance: none; // Retire le style natif (surtout sur mobile)
+
+  // État focus (quand on clique dedans)
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    // Utilisation de color.change pour la transparence (remplace rgba)
+    box-shadow: 0 0 0 3px color.change($primary, $alpha: 0.25);
+  }
+
+  // État désactivé
+  &:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+  }
+
+  // Si une erreur est présente (vous pouvez ajouter la classe .is-invalid)
+  &.is-invalid {
+    border-color: $danger;
+
+    &:focus {
+      box-shadow: 0 0 0 3px color.change($danger, $alpha: 0.25);
+    }
+  }
+}
+
+// Petit texte d'erreur sous l'input
+.error-msg {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+  color: $danger;
+}

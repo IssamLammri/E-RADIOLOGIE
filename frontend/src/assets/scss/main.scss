@@ -1,0 +1,13 @@
+// 1. D'abord les variables et outils
+@use 'variables';
+@use 'mixins'; // Si vous en créez un
+
+// 2. Ensuite la base
+@use 'reset';
+
+// 3. Ensuite les composants globaux
+@use 'components/buttons'; // Si vous créez ce fichier
+@use 'components/forms';   // Si vous créez ce fichier
+@use 'pages/login';
+
+// Ici, vous pouvez ajouter d'autres styles globaux si nécessaire

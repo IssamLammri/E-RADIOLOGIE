@@ -1,0 +1,17 @@
+// src/assets/scss/_reset.scss
+
+// 👇 AJOUTEZ CETTE LIGNE (indispensable pour voir $font-stack, $bg-color, etc.)
+@use 'variables' as *;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: $font-stack; // Maintenant il reconnait la variable !
+  background-color: $bg-color;
+  color: $text-color;
+  line-height: 1.6;
+}
