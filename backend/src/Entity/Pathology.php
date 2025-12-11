@@ -43,7 +43,11 @@ class Pathology
      * @var Collection<int, ClinicalCase>
      */
     #[ORM\OneToMany(targetEntity: ClinicalCase::class, mappedBy: 'pathology')]
-    private Collection $clinicalCases;
+    private Collection $clinicalCases {
+        get {
+            return $this->clinicalCases;
+        }
+    }
 
     public function __construct()
     {
@@ -137,14 +141,6 @@ class Pathology
         $this->conclusion = $conclusion;
 
         return $this;
-    }
-
-    /**
-     * @return Collection<int, ClinicalCase>
-     */
-    public function getClinicalCases(): Collection
-    {
-        return $this->clinicalCases;
     }
 
     public function addClinicalCase(ClinicalCase $clinicalCase): static
