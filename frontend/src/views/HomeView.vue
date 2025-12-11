@@ -1,48 +1,53 @@
 <script setup lang="ts">
-import { useAuthStore } from '../stores/auth';
-import { useRouter } from 'vue-router';
-
-const authStore = useAuthStore();
-const router = useRouter();
-
-const handleLogout = () => {
-  // 1. On nettoie le token
-  authStore.logout();
-  // 2. On redirige vers le login
-  router.push('/login');
-};
+import Sidebar from '@/components/layout/Sidebar.vue';
+import TopBar from '@/components/layout/TopBar.vue';
 </script>
 
 <template>
-  <div class="home-container">
-    <h1>Bienvenue sur E-Radiologie 🏥</h1>
-    <p>Vous êtes connecté en tant qu'utilisateur sécurisé.</p>
+  <div class="dashboard-layout">
+    <Sidebar />
 
-    <div class="status">
-      Statut du Token : <span class="valid">VALIDE</span>
-    </div>
+    <main class="main-content">
+      <TopBar />
 
-    <button @click="handleLogout" class="btn-logout">Se déconnecter</button>
+      <div class="page-container">
+        <h1>Tableau de bord</h1>
+        <p>Bienvenue sur votre espace E-RADIOLOGIE.</p>
+
+        <div class="content-placeholder">
+          <p>Sélectionnez un menu à gauche pour commencer.</p>
+        </div>
+      </div>
+    </main>
   </div>
 </template>
 
-<style scoped>
-.home-container {
-  max-width: 800px;
-  margin: 50px auto;
-  text-align: center;
-  font-family: sans-serif;
+<style scoped lang="scss">
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f4f6f8; // Fond gris clair global
 }
-.status { margin: 20px 0; font-size: 1.2rem; }
-.valid { color: #28a745; font-weight: bold; }
 
-.btn-logout {
-  padding: 10px 20px;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 0; // La marge est gérée par le padding du TopBar ou ici
 }
-.btn-logout:hover { background-color: #c82333; }
+
+.page-container {
+  padding: 2rem;
+  margin-left: 260px; // Indispensable pour ne pas passer sous la sidebar
+  margin-top: 0;
+}
+
+.content-placeholder {
+  margin-top: 2rem;
+  padding: 3rem;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  text-align: center;
+  color: #888;
+}
 </style>

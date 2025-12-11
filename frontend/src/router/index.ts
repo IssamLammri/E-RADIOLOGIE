@@ -18,7 +18,12 @@ const router = createRouter({
       name: 'home',
       component: HomeView,
       meta: { requiresAuth: true }
-    }
+    },
+    { path: '/cas-clinique', name: 'cas-clinique', component: HomeView, meta: { requiresAuth: true } },
+    { path: '/examens', name: 'examens', component: HomeView, meta: { requiresAuth: true } },
+    { path: '/pathologies', name: 'pathologies', component: HomeView, meta: { requiresAuth: true } },
+    { path: '/patients', name: 'patients', component: HomeView, meta: { requiresAuth: true } },
+    { path: '/users', name: 'users', component: HomeView, meta: { requiresAuth: true } },
   ]
 })
 
