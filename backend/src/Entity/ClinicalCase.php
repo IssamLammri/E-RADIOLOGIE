@@ -16,8 +16,10 @@ class ClinicalCase
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
-    private ?int $patientAge = null;
+    // Remplacer patientAge par une relation avec Patient
+    #[ORM\ManyToOne(targetEntity: Patient::class, inversedBy: 'clinicalCases')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Patient $patient = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $symptoms = null;
@@ -43,14 +45,14 @@ class ClinicalCase
         return $this->id;
     }
 
-    public function getPatientAge(): ?int
+    public function getPatient(): ?Patient
     {
-        return $this->patientAge;
+        return $this->patient;
     }
 
-    public function setPatientAge(int $patientAge): static
+    public function setPatient(?Patient $patient): static
     {
-        $this->patientAge = $patientAge;
+        $this->patient = $patient;
 
         return $this;
     }

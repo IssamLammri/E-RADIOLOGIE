@@ -50,10 +50,10 @@ help:
 # Docker
 # ===============================
 
-up:
+start:
 	$(DC) up -d
 
-down:
+stop:
 	$(DC) down
 
 restart:
@@ -118,7 +118,7 @@ phpunit:
 front-install:
 	cd $(FRONT_DIR) && npm install
 
-front-dev:
+dev:
 	cd $(FRONT_DIR) && npm run dev
 
 front-build:
