@@ -42,7 +42,7 @@ services:
       PMA_USER: root
       PMA_PASSWORD: root
     ports:
-      - "8081:80"          # phpMyAdmin sur http://localhost:8082
+      - "8089:80"          # phpMyAdmin sur http://localhost:8082
     depends_on:
       - db
 
