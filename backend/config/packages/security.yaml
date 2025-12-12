@@ -48,7 +48,7 @@ security:
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
 
         # On oblige d'être connecté pour accéder au reste de l'API
-        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api,       roles: PUBLIC_ACCESS }
 
 # Optimisation pour les tests (ne pas toucher)
 when@test:

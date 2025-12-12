@@ -13,7 +13,7 @@ import logoImg from '@/assets/images/logo_e-radiologie.png'; // Assurez-vous que
         <span class="icon">📁</span> Cas Cliniques
       </router-link>
 
-      <router-link to="/examens" class="nav-item">
+      <router-link to="/exams" class="nav-item">
         <span class="icon">🩻</span> Examens
       </router-link>
 
@@ -23,6 +23,10 @@ import logoImg from '@/assets/images/logo_e-radiologie.png'; // Assurez-vous que
 
       <router-link to="/patients" class="nav-item">
         <span class="icon">👥</span> Patients
+      </router-link>
+
+      <router-link to="/modalities" class="nav-item">
+        <span class="icon">🏷️</span> Modalités
       </router-link>
 
       <div class="divider"></div>
