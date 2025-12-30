@@ -188,14 +188,17 @@ axios.get('/patients')
 
 ## 10. Prochaines évolutions possibles
 
-- Authentification JWT
 - Gestion des rôles (admin, radiologue)
 - Upload de fichiers médicaux
 - Dockerisation du frontend
 - CI/CD
 
 ---
+### 11. ⚠️ Note – Chargement des fixtures
+```bash
+php bin/console doctrine:fixtures:load
 
+```
 ## Auteur
 
 Projet **E-RADIOLOGIE** – environnement de développement Dockerisé

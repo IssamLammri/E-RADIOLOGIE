@@ -5,6 +5,7 @@ services:
     container_name: eradio_php
     volumes:
       - ./backend:/var/www/html
+      - uploads_data:/var/www/html/public/uploads
     depends_on:
       - db
 
@@ -15,8 +16,9 @@ services:
     ports:
       - "8090:80"
     volumes:
-      - ./backend:/var/www/html              # plus simple que juste /public
-      - ./backend/nginx:/etc/nginx/conf.d    # on monte le dossier, pas un fichier
+      - ./backend:/var/www/html
+      - uploads_data:/var/www/html/public/uploads
+      - ./backend/nginx:/etc/nginx/conf.d
     depends_on:
       - php
 
@@ -29,11 +31,10 @@ services:
       MYSQL_DATABASE: eradiologie
       MYSQL_USER: eradio_user
       MYSQL_PASSWORD: eradio_pass
-    # pas de ports ici
     volumes:
       - db_data:/var/lib/mysql
 
-  # --- phpMyAdmin (facultatif mais pratique) ---
+  # --- phpMyAdmin (facultatif) ---
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: eradio_pma
@@ -42,9 +43,10 @@ services:
       PMA_USER: root
       PMA_PASSWORD: root
     ports:
-      - "8089:80"          # phpMyAdmin sur http://localhost:8082
+      - "8089:80"
     depends_on:
       - db
 
 volumes:
   db_data:
+  uploads_data:

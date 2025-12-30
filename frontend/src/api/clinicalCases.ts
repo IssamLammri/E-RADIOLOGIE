@@ -1,43 +1,41 @@
 import apiClient from './axios';
 
-// Définition du type selon vos champs backend
 export interface ClinicalCase {
   id: number;
-  title: string;
-  description?: string;
-  status: string; // Ex: "Brouillon", "Publié"
-  createdAt: string;
-}
 
-// Réponse type d'API Platform (Hydra)
-interface ApiResponse<T> {
-  'hydra:member': T[];
-  'hydra:totalItems': number;
+  patient: string;   // IRI: "/api/patients/1"
+  exam: string;      // IRI: "/api/exams/1"
+  pathology: string; // IRI: "/api/pathologies/1"
+
+  symptoms?: string;
+  images?: string;        // string (URL/texte). Pour upload on fera plus tard.
+  imageComment?: string;
+  conclusion?: string;
 }
 
 export default {
-  // Récupérer tous les cas
   getAll() {
-    return apiClient.get<ApiResponse<ClinicalCase>>('/clinical_cases');
+    return apiClient.get('/clinical_cases');
   },
-
-  // Récupérer un seul cas
   get(id: number) {
     return apiClient.get<ClinicalCase>(`/clinical_cases/${id}`);
   },
-
-  // Créer un cas
   create(data: Partial<ClinicalCase>) {
     return apiClient.post<ClinicalCase>('/clinical_cases', data);
   },
-
-  // Modifier un cas
   update(id: number, data: Partial<ClinicalCase>) {
-    return apiClient.patch<ClinicalCase>(`/clinical_cases/${id}`, data);
+    return apiClient.patch<ClinicalCase>(`/clinical_cases/${id}`, data, {
+      headers: { 'Content-Type': 'application/merge-patch+json' }
+    });
   },
-
-  // Supprimer un cas
   delete(id: number) {
     return apiClient.delete(`/clinical_cases/${id}`);
+  },
+  uploadImage(id: number, file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiClient.post(`/clinical_cases/${id}/image`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
   }
 };

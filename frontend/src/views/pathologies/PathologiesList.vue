@@ -1,0 +1,117 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import Sidebar from '@/components/layout/Sidebar.vue';
+import TopBar from '@/components/layout/TopBar.vue';
+import pathologyService, { type Pathology } from '@/api/pathologies';
+
+const pathologies = ref<Pathology[]>([]);
+const isLoading = ref(true);
+const error = ref('');
+
+const fetchPathologies = async () => {
+  isLoading.value = true;
+  error.value = '';
+  try {
+    const response = await pathologyService.getAll();
+    const data = response.data as any;
+    pathologies.value = data['hydra:member'] || data.member || [];
+  } catch (err) {
+    console.error(err);
+    error.value = "Impossible de charger les pathologies.";
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const handleDelete = async (id: number) => {
+  if (confirm("Supprimer cette pathologie ?")) {
+    try {
+      await pathologyService.delete(id);
+      pathologies.value = pathologies.value.filter(p => p.id !== id);
+    } catch (err) {
+      alert("Erreur lors de la suppression.");
+    }
+  }
+};
+
+onMounted(fetchPathologies);
+</script>
+
+<template>
+  <div class="dashboard-layout">
+    <Sidebar />
+    <main class="main-content">
+      <TopBar />
+      <div class="page-container">
+
+        <div class="page-header">
+          <div>
+            <h1>Pathologies</h1>
+            <p class="subtitle">Référentiel des pathologies</p>
+          </div>
+          <router-link to="/pathologies/nouveau" class="btn btn-primary">+ Nouvelle Pathologie</router-link>
+        </div>
+
+        <div v-if="isLoading" class="loading-state">Chargement...</div>
+        <div v-else-if="error" class="error-msg">⚠️ {{ error }}</div>
+
+        <div v-else class="table-card">
+          <table class="data-table">
+            <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Introduction</th>
+              <th class="actions-col">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="p in pathologies" :key="p.id">
+              <td class="fw-bold">{{ p.name }}</td>
+              <td>{{ p.introduction ? p.introduction.slice(0, 80) + (p.introduction.length > 80 ? '…' : '') : '-' }}</td>
+              <td class="actions">
+                <router-link class="btn-icon" :to="`/pathologies/edit/${p.id}`">✏️</router-link>
+                <button class="btn-icon delete" @click="handleDelete(p.id)">🗑️</button>
+              </td>
+            </tr>
+            <tr v-if="pathologies.length === 0">
+              <td colspan="3" class="empty-state">Aucune pathologie trouvée.</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</template>
+
+<style scoped lang="scss">
+@use "@/assets/scss/variables" as *;
+
+.dashboard-layout { display: flex; min-height: 100vh; background-color: #f4f6f8; }
+.main-content { flex: 1; display: flex; flex-direction: column; }
+.page-container { padding: 2rem; margin-left: 260px; }
+
+.page-header {
+  display: flex; justify-content: space-between; margin-bottom: 2rem;
+  h1 { margin-bottom: 0.2rem; }
+  .subtitle { color: $secondary; }
+}
+
+.table-card { background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow: hidden; }
+
+.data-table {
+  width: 100%; border-collapse: collapse;
+  th, td { padding: 1rem; border-bottom: 1px solid #f0f0f0; text-align: left; }
+  th { background: #fafafa; color: $secondary; font-size: 0.85rem; text-transform: uppercase; }
+}
+
+.fw-bold { font-weight: 600; color: $primary; }
+
+.actions { text-align: right; display: flex; justify-content: flex-end; gap: 10px; }
+.btn-icon { background: none; border: none; cursor: pointer; font-size: 1.1rem; text-decoration: none; padding: 6px 8px; border-radius: 6px;
+  &:hover { background: #eee; }
+}
+.loading-state, .empty-state { text-align: center; padding: 2rem; color: $secondary; }
+.error-msg { color: $danger; }
+</style>

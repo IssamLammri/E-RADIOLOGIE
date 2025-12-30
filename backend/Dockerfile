@@ -13,12 +13,14 @@ WORKDIR /var/www/html
 
 # Copier les fichiers (on affinera avec docker-compose pour le volume)
 COPY . .
+COPY docker/php/conf.d/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
 
 # Install deps Symfony
 RUN composer install --no-interaction
 
-# Donner les bons droits
-RUN chown -R www-data:www-data /var/www/html/var
+RUN mkdir -p /var/www/html/public/uploads/clinical-cases \
+    && chown -R www-data:www-data /var/www/html/var /var/www/html/public/uploads \
+    && chmod -R 775 /var/www/html/public/uploads
 
 CMD ["php-fpm"]
 

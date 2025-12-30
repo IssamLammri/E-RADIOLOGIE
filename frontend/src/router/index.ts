@@ -22,6 +22,11 @@ import ExamForm from '../views/exams/ExamForm.vue';
 import ModalityList from '../views/modalities/ModalityList.vue';
 import ModalityForm from '../views/modalities/ModalityForm.vue';
 
+// Vues Pathologies
+import PathologiesList from '../views/pathologies/PathologiesList.vue';
+import PathologyForm from '../views/pathologies/PathologyForm.vue';
+
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -48,6 +53,14 @@ const router = createRouter({
       component: ClinicalCaseForm,
       meta: { requiresAuth: true }
     },
+
+    {
+      path: '/cas-clinique/edit/:id',
+      name: 'cas-clinique-edit',
+      component: ClinicalCaseForm,
+      meta: { requiresAuth: true }
+    },
+
 
     {
       path: '/patients',
@@ -103,7 +116,25 @@ const router = createRouter({
     },
 
 
-    { path: '/pathologies', name: 'pathologies', component: HomeView, meta: { requiresAuth: true } },
+    {
+      path: '/pathologies',
+      name: 'pathologies-list',
+      component: PathologiesList,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/pathologies/nouveau',
+      name: 'pathology-create',
+      component: PathologyForm,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/pathologies/edit/:id',
+      name: 'pathology-edit',
+      component: PathologyForm,
+      meta: { requiresAuth: true }
+    },
+
     { path: '/users', name: 'users', component: HomeView, meta: { requiresAuth: true } },
   ]
 })
