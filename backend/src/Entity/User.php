@@ -3,36 +3,76 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Repository\UserRepository;
+use App\State\UserPasswordHasherProcessor;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-# 1. On ajoute cet import indispensable
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new Get(),
+        new GetCollection(),
+        new Post(validationContext: ['groups' => ['Default', 'user:create']]),
+        new Patch(),
+        new Delete(),
+    ],
+    normalizationContext: ['groups' => ['user:read']],
+    denormalizationContext: ['groups' => ['user:write']],
+    processor: UserPasswordHasherProcessor::class
+)]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-# 2. On implémente PasswordAuthenticatedUserInterface ici
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    #[Groups(['user:read'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['user:read', 'user:write'])]
+    #[Assert\NotBlank]
+    #[Assert\Email]
     #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
+    /**
+     * Mot de passe hashé (stocké en DB).
+     * IMPORTANT : write-only (jamais renvoyé par l'API)
+     */
+    #[Groups(['user:write'])]
     #[ORM\Column]
     private ?string $password = null;
 
+    /**
+     * Mot de passe en clair envoyé par le front.
+     * NON persisté en DB.
+     */
+    #[Groups(['user:write'])]
+    #[Assert\NotBlank(groups: ['user:create'])]
+    #[Assert\Length(min: 6, minMessage: 'Le mot de passe doit contenir au moins {{ limit }} caractères.')]
+    private ?string $plainPassword = null;
+
+    #[Groups(['user:read', 'user:write'])]
     #[ORM\Column(type: Types::JSON)]
     private array $roles = [];
 
+    #[Groups(['user:read', 'user:write'])]
+    #[Assert\NotBlank]
     #[ORM\Column(length: 255)]
     private ?string $firstName = null;
 
+    #[Groups(['user:read', 'user:write'])]
+    #[Assert\NotBlank]
     #[ORM\Column(length: 255)]
     private ?string $lastName = null;
 
@@ -52,24 +92,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * Identifiant visuel de l'utilisateur (obligatoire UserInterface)
-     */
     public function getUserIdentifier(): string
     {
         return (string) $this->email;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // On garantit que chaque utilisateur a au moins le rôle ROLE_USER
         $roles[] = 'ROLE_USER';
-
-        return array_unique($roles);
+        return array_values(array_unique($roles));
     }
 
     public function setRoles(array $roles): static
@@ -79,16 +111,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @see PasswordAuthenticatedUserInterface
+     * PasswordAuthenticatedUserInterface
+     * -> retourne le mot de passe HASHÉ stocké
      */
     public function getPassword(): string
     {
-        return $this->password;
+        return (string) $this->password;
     }
 
     public function setPassword(string $password): static
     {
         $this->password = $password;
+        return $this;
+    }
+
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(?string $plainPassword): static
+    {
+        $this->plainPassword = $plainPassword;
         return $this;
     }
 
@@ -114,11 +158,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function eraseCredentials(): void
     {
-        // $this->plainPassword = null;
+        // Sécurité : on nettoie le plainPassword après usage
+        $this->plainPassword = null;
     }
 }

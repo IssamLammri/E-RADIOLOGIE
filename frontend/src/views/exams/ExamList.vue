@@ -8,13 +8,54 @@ const exams = ref<Exam[]>([]);
 const isLoading = ref(true);
 const error = ref('');
 
+// ✅ cache IRI -> label
+const iriCache = new Map<string, string>();
+
+const normalizeIri = (iri: string) => {
+  if (!iri) return iri;
+  if (iri.startsWith('http://') || iri.startsWith('https://')) return iri;
+  // évite /api/api/... car baseURL axios est déjà .../api
+  return iri.replace(/^\/api\//, '/');
+};
+
+const resolveIriLabel = async (iri?: string) => {
+  if (!iri) return '-';
+  if (iriCache.has(iri)) return iriCache.get(iri)!;
+
+  try {
+    const fixed = normalizeIri(iri);
+    const { default: apiClient } = await import('@/api/axios');
+    const res = await apiClient.get(fixed);
+
+    const label = res.data?.name ?? `#${res.data?.id ?? ''}`;
+    iriCache.set(iri, label);
+    return label;
+  } catch (e) {
+    console.warn('Impossible de résoudre IRI', iri, e);
+    iriCache.set(iri, iri); // fallback
+    return iri;
+  }
+};
+
+const enrichModalities = async () => {
+  // Remplit exam._modalityName (champ runtime)
+  await Promise.all(
+    exams.value.map(async (exam: any) => {
+      exam._modalityName = await resolveIriLabel(exam.modality);
+    })
+  );
+};
+
 const fetchExams = async () => {
   isLoading.value = true;
   try {
     const response = await examService.getAll();
     const data = response.data as any;
-    // Gestion robuste (JSON-LD vs JSON simple)
+
     exams.value = data['hydra:member'] || data.member || [];
+
+    // ✅ résout les modalités en noms
+    await enrichModalities();
   } catch (err) {
     console.error(err);
     error.value = "Impossible de charger les examens.";
@@ -61,7 +102,7 @@ onMounted(() => fetchExams());
             <tr>
               <th>Nom</th>
               <th>Description</th>
-              <th>Modalité (IRI)</th>
+              <th>Modalité</th>
               <th class="actions-col">Actions</th>
             </tr>
             </thead>
@@ -70,7 +111,9 @@ onMounted(() => fetchExams());
               <td class="fw-bold">{{ exam.name }}</td>
               <td>{{ exam.description || '-' }}</td>
               <td>
-                <span class="badge">{{ exam.modality }}</span>
+                <span class="badge">
+                  {{ (exam as any)._modalityName || '-' }}
+                </span>
               </td>
               <td class="actions">
                 <button class="btn-icon delete" @click="handleDelete(exam.id)">🗑️</button>
@@ -89,17 +132,35 @@ onMounted(() => fetchExams());
 
 <style scoped lang="scss">
 @use "@/assets/scss/variables" as *;
-// Styles identiques aux précédents
+
 .dashboard-layout { display: flex; min-height: 100vh; background-color: #f4f6f8; }
 .main-content { flex: 1; display: flex; flex-direction: column; }
 .page-container { padding: 2rem; margin-left: 260px; }
-.page-header { display: flex; justify-content: space-between; margin-bottom: 2rem; h1 { margin-bottom: 0.2rem; } .subtitle { color: $secondary; } }
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+
+  h1 { margin-bottom: 0.2rem; }
+  .subtitle { color: $secondary; }
+}
+
 .table-card { background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); overflow: hidden; }
-.data-table { width: 100%; border-collapse: collapse; th, td { padding: 1rem; border-bottom: 1px solid #f0f0f0; text-align: left; } th { background: #fafafa; color: $secondary; font-size: 0.85rem; text-transform: uppercase; } }
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td { padding: 1rem; border-bottom: 1px solid #f0f0f0; text-align: left; }
+  th { background: #fafafa; color: $secondary; font-size: 0.85rem; text-transform: uppercase; }
+}
+
 .fw-bold { font-weight: 600; color: $primary; }
 .badge { background: #eef2f7; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; }
+
 .actions { text-align: right; }
 .btn-icon { background: none; border: none; cursor: pointer; font-size: 1.1rem; &:hover { background: #eee; } }
+
 .loading-state, .empty-state { text-align: center; padding: 2rem; color: $secondary; }
 .error-msg { color: $danger; }
 </style>

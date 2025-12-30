@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
 
@@ -7,6 +7,18 @@ const authStore = useAuthStore();
 const router = useRouter();
 
 const isDropdownOpen = ref(false);
+
+const displayName = computed(() => {
+  const n = authStore.fullName;
+  return n && n.length ? n : (authStore.user?.email ?? 'Utilisateur');
+});
+
+const displayRole = computed(() => authStore.mainRole || '');
+
+const avatarUrl = computed(() => {
+  const name = encodeURIComponent(displayName.value || 'User');
+  return `https://ui-avatars.com/api/?name=${name}&background=0D8ABC&color=fff`;
+});
 
 const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value;
@@ -16,6 +28,13 @@ const handleLogout = () => {
   authStore.logout();
   router.push('/login');
 };
+
+// Optionnel : si tu arrives sur une page avec token mais user pas chargé
+onMounted(() => {
+  if (authStore.isAuthenticated && !authStore.user) {
+    authStore.fetchMe().catch(() => authStore.logout());
+  }
+});
 </script>
 
 <template>
@@ -27,14 +46,15 @@ const handleLogout = () => {
 
     <div class="user-profile" @click="toggleDropdown">
       <div class="user-info">
-        <span class="name">Dr. Radiologue</span>
-        <span class="role">Admin</span>
-      </div>
-      <div class="avatar">
-        <img src="https://ui-avatars.com/api/?name=Dr+Radiologue&background=0D8ABC&color=fff" alt="User" />
+        <span class="name">{{ displayName }}</span>
+        <span class="role">{{ displayRole }}</span>
       </div>
 
-      <div v-if="isDropdownOpen" class="dropdown-menu">
+      <div class="avatar">
+        <img :src="avatarUrl" alt="User" />
+      </div>
+
+      <div v-if="isDropdownOpen" class="dropdown-menu" @click.stop>
         <a href="#" class="dropdown-item">Mon Profil</a>
         <a href="#" class="dropdown-item">Paramètres</a>
         <div class="divider"></div>
@@ -57,7 +77,7 @@ const handleLogout = () => {
   justify-content: space-between;
   align-items: center;
   padding: 0 2rem;
-  margin-left: 260px; // Laisse la place à la sidebar
+  margin-left: 260px;
 }
 
 .search-container {
@@ -69,14 +89,7 @@ const handleLogout = () => {
   width: 400px;
 
   .search-icon { color: #888; margin-right: 10px; }
-
-  input {
-    border: none;
-    background: transparent;
-    outline: none;
-    width: 100%;
-    color: $text-color;
-  }
+  input { border: none; background: transparent; outline: none; width: 100%; color: $text-color; }
 }
 
 .user-profile {
@@ -84,7 +97,7 @@ const handleLogout = () => {
   align-items: center;
   gap: 1rem;
   cursor: pointer;
-  position: relative; // Pour positionner le dropdown
+  position: relative;
 
   .user-info {
     text-align: right;
@@ -93,9 +106,7 @@ const handleLogout = () => {
   }
 
   .avatar img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+    width: 40px; height: 40px; border-radius: 50%;
     border: 2px solid white;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   }
@@ -103,7 +114,7 @@ const handleLogout = () => {
 
 .dropdown-menu {
   position: absolute;
-  top: 120%; // Juste en dessous
+  top: 120%;
   right: 0;
   width: 200px;
   background: white;
@@ -127,7 +138,6 @@ const handleLogout = () => {
     cursor: pointer;
 
     &:hover { background-color: #f4f6f8; }
-
     &.logout { color: $danger; &:hover { background-color: rgba($danger, 0.05); } }
   }
 

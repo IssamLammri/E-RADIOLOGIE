@@ -1,4 +1,5 @@
 import apiClient from './axios';
+import type { AxiosRequestConfig } from 'axios';
 
 // Définition du type Patient selon votre API
 export interface Patient {
@@ -10,15 +11,17 @@ export interface Patient {
 }
 
 // Réponse type d'API Platform (Hydra)
-interface ApiResponse<T> {
-  'hydra:member': T[];
-  'hydra:totalItems': number;
+export interface ApiResponse<T> {
+  'hydra:member'?: T[];
+  member?: T[];
+  'hydra:totalItems'?: number;
+  totalItems?: number;
 }
 
 export default {
-  // Récupérer tous les patients
-  getAll() {
-    return apiClient.get<ApiResponse<Patient>>('/patients');
+  // Récupérer tous les patients (avec params optionnels)
+  getAll(config?: AxiosRequestConfig) {
+    return apiClient.get<ApiResponse<Patient>>('/patients', config);
   },
 
   // Récupérer un seul patient
@@ -32,11 +35,9 @@ export default {
   },
 
   // Modifier un patient
-  // Modifier un patient
   update(id: number, data: Partial<Patient>) {
     return apiClient.patch<Patient>(`/patients/${id}`, data, {
       headers: {
-        // ⚠️ INDISPENSABLE pour API Platform lors d'un PATCH
         'Content-Type': 'application/merge-patch+json'
       }
     });

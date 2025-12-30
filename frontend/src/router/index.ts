@@ -26,6 +26,10 @@ import ModalityForm from '../views/modalities/ModalityForm.vue';
 import PathologiesList from '../views/pathologies/PathologiesList.vue';
 import PathologyForm from '../views/pathologies/PathologyForm.vue';
 
+import UsersList from '../views/users/UsersList.vue';
+import UserForm from '../views/users/UserForm.vue';
+
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -135,7 +139,25 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
 
-    { path: '/users', name: 'users', component: HomeView, meta: { requiresAuth: true } },
+    {
+      path: '/users',
+      name: 'users-list',
+      component: UsersList,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/users/nouveau',
+      name: 'user-create',
+      component: UserForm,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/users/edit/:id',
+      name: 'user-edit',
+      component: UserForm,
+      meta: { requiresAuth: true }
+    },
+
   ]
 })
 

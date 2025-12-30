@@ -1,20 +1,23 @@
 import apiClient from './axios';
+import type { AxiosRequestConfig } from 'axios';
 
 export interface Modality {
   id: number;
   name: string;
-  '@id': string; // L'IRI (ex: "/api/modalities/1")
+  '@id': string; // IRI (ex: "/api/modalities/1")
 }
 
-interface ApiResponse<T> {
-  'hydra:member': T[];
-  'hydra:totalItems': number;
+export interface ApiResponse<T> {
+  'hydra:member'?: T[];
+  member?: T[];
+  'hydra:totalItems'?: number;
+  totalItems?: number;
 }
 
 export default {
-  // Récupérer toutes les modalités
-  getAll() {
-    return apiClient.get<ApiResponse<Modality>>('/modalities');
+  // Récupérer toutes les modalités (params optionnels)
+  getAll(config?: AxiosRequestConfig) {
+    return apiClient.get<ApiResponse<Modality>>('/modalities', config);
   },
 
   // Récupérer une seule modalité
@@ -27,7 +30,7 @@ export default {
     return apiClient.post<Modality>('/modalities', data);
   },
 
-  // Modifier (Attention au header merge-patch)
+  // Modifier (merge-patch)
   update(id: number, data: Partial<Modality>) {
     return apiClient.patch<Modality>(`/modalities/${id}`, data, {
       headers: { 'Content-Type': 'application/merge-patch+json' }

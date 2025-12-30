@@ -2,48 +2,116 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import apiClient from '../api/axios';
-import { useRouter } from 'vue-router';
+
+export type AuthUser = {
+  id?: number;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  roles?: string[];
+};
 
 export const useAuthStore = defineStore('auth', () => {
-  // On initialise le token avec ce qui est stocké dans le navigateur (s'il y en a un)
+  // --- STATE ---
   const token = ref<string | null>(localStorage.getItem('token'));
+  const user = ref<AuthUser | null>(
+    localStorage.getItem('auth_user')
+      ? JSON.parse(localStorage.getItem('auth_user') as string)
+      : null
+  );
 
-  // Cette variable calculée nous dit instantanément si l'user est connecté
+  // --- GETTERS ---
   const isAuthenticated = computed(() => !!token.value);
 
-  // --- ACTION : Se connecter ---
+  const fullName = computed(() => {
+    if (!user.value) return '';
+    const fn = user.value.firstName ?? '';
+    const ln = user.value.lastName ?? '';
+    const name = `${fn} ${ln}`.trim();
+    return name.length ? name : (user.value.email ?? '');
+  });
+
+  const mainRole = computed(() => {
+    const roles = user.value?.roles ?? [];
+    if (roles.includes('ROLE_ADMIN')) return 'Admin';
+    if (roles.includes('ROLE_USER')) return 'Utilisateur';
+    return roles[0] ? roles[0].replace('ROLE_', '') : '';
+  });
+
+  // --- HELPERS ---
+  function setToken(newToken: string | null) {
+    token.value = newToken;
+    if (newToken) localStorage.setItem('token', newToken);
+    else localStorage.removeItem('token');
+  }
+
+  function setUser(newUser: AuthUser | null) {
+    user.value = newUser;
+    if (newUser) localStorage.setItem('auth_user', JSON.stringify(newUser));
+    else localStorage.removeItem('auth_user');
+  }
+
+  // --- ACTIONS ---
   async function login(email: string, password: string) {
     try {
-      // On envoie la requête (l'URL de base est déjà configurée dans axios)
-      const response = await apiClient.post('/login_check', {
-        email,
-        password
-      });
+      const response = await apiClient.post('/login_check', { email, password });
 
-      const newToken = response.data.token;
+      const newToken = response.data.token as string;
+      setToken(newToken);
 
-      // On met à jour le store ET le stockage local
-      token.value = newToken;
-      localStorage.setItem('token', newToken);
+      // ✅ récupérer les infos user connecté
+      await fetchMe();
 
-      return true; // Succès
+      return true;
     } catch (error) {
       console.error('Erreur lors du login :', error);
-      throw error; // On renvoie l'erreur pour l'afficher dans le formulaire
+      throw error;
     }
   }
 
-  // --- ACTION : Se déconnecter ---
+  async function fetchMe() {
+    // nécessite un backend /api/me
+    const res = await apiClient.get('/me');
+    setUser(res.data);
+    return res.data;
+  }
+
+  async function initAuth() {
+    // À appeler au démarrage de l'app si token existant
+    if (!token.value) {
+      setUser(null);
+      return;
+    }
+
+    // si user déjà en cache local, on peut le garder,
+    // mais on tente de le rafraîchir (au cas où roles/champs changent)
+    try {
+      await fetchMe();
+    } catch (e) {
+      // token invalide/expiré => on purge tout
+      logout();
+    }
+  }
+
   function logout() {
-    token.value = null;
-    localStorage.removeItem('token');
-    // Note : La redirection se fera souvent côté composant ou router
+    setToken(null);
+    setUser(null);
   }
 
   return {
+    // state
     token,
+    user,
+
+    // getters
     isAuthenticated,
+    fullName,
+    mainRole,
+
+    // actions
     login,
+    fetchMe,
+    initAuth,
     logout
   };
 });
