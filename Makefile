@@ -129,3 +129,29 @@ front-test:
 
 front-lint:
 	cd $(FRONT_DIR) && npm run lint || true
+
+# ===============================
+# Raccourcis cohérents (alias)
+# ===============================
+
+.PHONY: up down front-dev
+
+up: start
+down: stop
+front-dev: dev
+
+# ===============================
+# Commandes "tout-en-un"
+# ===============================
+
+.PHONY: install all
+
+# Installe tout : build+up + composer + npm + migrations (et optionnel fixtures)
+install: build up composer front-install migrate
+	@echo "✅ Installation complète terminée."
+
+# Lance tout : containers + front en mode dev (vite)
+# (le front tourne dans ton terminal, donc on le lance en dernier)
+all: up
+	@echo "✅ Conteneurs démarrés. Lancement du front..."
+	$(MAKE) dev
