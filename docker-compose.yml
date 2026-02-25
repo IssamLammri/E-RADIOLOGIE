@@ -14,9 +14,10 @@ services:
     image: nginx:alpine
     container_name: eradio_nginx
     ports:
-      - "8090:80"   # ✅ API publique (change en 8091 si 8090 est pris)
+      - "8090:80"
     volumes:
       - ./backend:/var/www/html
+      - ./frontend/dist:/usr/share/nginx/html:ro   # ✅ AJOUT
       - uploads_data:/var/www/html/public/uploads
       - ./backend/nginx:/etc/nginx/conf.d
     depends_on:
