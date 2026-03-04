@@ -147,7 +147,7 @@ front-dev: dev
 .PHONY: install all
 
 # Installe tout : build+up + composer + npm + migrations (et optionnel fixtures)
-install: build up composer front-install migrate
+install: build up composer front-install migrate fixtures
 	@echo "✅ Installation complète terminée."
 
 # Lance tout : containers + front en mode dev (vite)
